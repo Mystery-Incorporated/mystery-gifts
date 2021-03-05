@@ -14,7 +14,8 @@ import {
     TextInput, 
     Image, 
     ResponsiveContext,
-    Layer
+    Layer,
+    FormField
 } from 'grommet';
 
 import { Login, Menu, Logout, Add, Close, Analytics, Chat, Clock, Configure, Help, Projects, StatusInfoSmall, Search } from "grommet-icons";
@@ -27,6 +28,16 @@ import {Rules} from 'Components';
 
 import ContentLoader from 'react-content-loader';
 import Avatar from 'react-avatar';
+import {Spinner} from 'Components';
+
+import { WithContext as ReactTags } from 'react-tag-input';
+
+const KeyCodes = {
+  comma: 188,
+  enter: 13,
+};
+
+const delimiters = [KeyCodes.comma, KeyCodes.enter];
 
 const AvatarWithText = props => (
     <ContentLoader 
@@ -60,9 +71,40 @@ class Dashboard extends Component {
             searchValue: "",
             showSuggestions:false,
             error:'',
-            addItem:false
+            addItem:false,
+            addingItem: false,
+            itemTitle: "",
+            itemURL: "",
+            itemCategories: [],
+            itemMaxCost: 0
         };
+
+        this.handleDelete = this.handleDelete.bind(this);
+        this.handleAddition = this.handleAddition.bind(this);
+        this.handleDrag = this.handleDrag.bind(this);
     }  
+
+    handleDelete(i) {
+        const tags  = this.state.itemCategories;
+        this.setState({
+            itemCategories: tags.filter((tag, index) => index !== i),
+        });
+    }
+
+    handleAddition(tag) {
+        this.setState(state => ({ itemCategories: [...state.itemCategories, tag] }));
+    }
+
+    handleDrag(tag, currPos, newPos) {
+        const tags = [...this.state.itemCategories];
+        const newTags = tags.slice();
+
+        newTags.splice(currPos, 1);
+        newTags.splice(newPos, 0, tag);
+
+        // re-render
+        this.setState({ itemCategories: newTags });
+    }
 
     handleInputChange = (event) => {
         const { value, name } = event.target;
@@ -137,6 +179,23 @@ class Dashboard extends Component {
         );
 
         this.setState({ searchSuggestions: filtered});
+    }
+
+    isNumeric(str) {
+        if (typeof str != "string") return false // we only process strings!  
+        return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+               !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+    }
+
+    submitWish() {
+        console.log("WISH", this.state)
+
+        if (this.isNumeric(this.state.itemMaxCost)) {
+
+        }
+        else {
+            this.setState({error:"Max Cost must be a valid price."})
+        }
     }
 
     render() {    
@@ -341,22 +400,108 @@ class Dashboard extends Component {
                 width="100vw"
                 height="100vh"
             >
-                {this.state.addItem && 
-                    <Layer animation="fadeIn" modal={true}>
-                        <Box width="100%" height="100%" background={this.props.data.color3} align="center" justify="center" pad="none" >
-                            <Box background="white" align="center" justify="center" pad="large">
+                {!this.state.addItem && 
+                    <Layer animation="fadeIn" modal={true} round="10px">
+                        <Box width="100%" height="100%" background="none" align="start" justify="center" pad="none" direction="column" round="10px">
+                            <Box
+                                width="800px"
+                                height={{"min":"130px"}}
+                                background={this.props.data.color2}
+                                pad="medium"
+                                direction="row"
+                                align="center"
+                            >
+                                <Text margin="small" color={this.props.data.color1} size="xxlarge">Wish list item</Text>
+                            </Box>
+                            {this.state.error !== "" && 
                                 <Box
-                                    height="30px"
-                                    onClick={() => this.setState({addItem:false})}
-                                    pad="medium"
-                                    background="#000"
+                                    width="800px"
+                                    background="red"
+                                    pad="small"
                                     direction="row"
-                                    justify="center"
                                     align="center"
-                                    round="50px"
                                 >
-                                    <Text color="#eee" size="small">Close</Text>
+                                    <Text margin="small" color={this.props.data.color1} size="small">{this.state.error}</Text>
                                 </Box>
+                            }
+                            <Box background="white" align="start" justify="start" pad="large" round="10px" direction="column" gap="small" overflow={{"vertical":"auto"}}>
+                                
+                                <FormField height={{"min":"90px"}} name="title" label="Title" width="700px">
+                                    <TextInput  
+                                        placeholder='Title of this item' 
+                                        name="title" 
+                                        onChange={event => {this.setState({itemTitle: event.target.value});}}
+                                    />
+                                </FormField>
+                                <FormField height={{"min":"90px"}} name="url" label="Item Link" width="700px">
+                                    <TextInput  
+                                        placeholder='URL of this item' 
+                                        name="url" 
+                                        onChange={event => {this.setState({itemURL: event.target.value});}}
+                                    />
+                                </FormField>
+                                <FormField height={{"min":"90px"}} name="cost" label="Maximum Cost" width="700px">
+                                    <TextInput  
+                                        placeholder='Max cost limit for this item' 
+                                        name="cost" 
+                                        onChange={event => {this.setState({itemMaxCost: event.target.value});}}
+                                    />
+                                </FormField>
+                                <FormField height={{"min":"90px"}} name="tags" label="Item categories" width="700px">
+
+                                    <Box
+                                        direction="row"
+                                        gap="small"
+                                    >
+                                        <ReactTags 
+                                            tags={this.state.itemCategories}
+                                            suggestions={[]}
+                                            handleDelete={this.handleDelete}
+                                            handleAddition={this.handleAddition}
+                                            handleDrag={this.handleDrag}
+                                            delimiters={delimiters} 
+                                        />
+                                    </Box>
+                                    
+                                </FormField>
+                                <Box
+                                    direction="row"
+                                    gap="small"
+                                    height={{"min":"90px"}}
+                                >
+                                    <Box
+                                        height="30px"
+                                        onClick={() => this.submitWish()}
+                                        pad="medium"
+                                        background="#000"
+                                        direction="row"
+                                        justify="center"
+                                        align="center"
+                                        round="50px"
+                                    >
+                                        {this.state.addingItem ? (
+                                            <Box direction="row" gap="small">
+                                                {" "}
+                                                <Spinner color="#fff" /> <Text size="small"> Adding... </Text>
+                                            </Box>
+                                        ):(<Text color="#eee" size="small">Submit</Text>)}
+                                        
+                                    </Box>
+                                    <Box
+                                        height="30px"
+                                        onClick={() => this.setState({addItem:false})}
+                                        pad="medium"
+                                        background="none"
+                                        direction="row"
+                                        justify="center"
+                                        align="center"
+                                        round="50px"
+                                        border="small"
+                                    >
+                                        <Text color="#000" size="small">Close</Text>
+                                    </Box>
+                                </Box>
+                                
                             </Box>
                         </Box>
                     </Layer>
