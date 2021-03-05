@@ -18,7 +18,7 @@ import {
     FormField
 } from 'grommet';
 
-import { Login, Menu, Logout, Add, Close, Analytics, Chat, Clock, Configure, Help, Projects, StatusInfoSmall, Search } from "grommet-icons";
+import { Login, Menu, Logout, Add, Close, Analytics, Chat, Clock, Configure, Help, Projects, Search } from "grommet-icons";
 
 import {Banner, BannerAlt} from 'Media';
 import { RiUser4Line } from "react-icons/ri";
@@ -31,6 +31,7 @@ import Avatar from 'react-avatar';
 import {Spinner} from 'Components';
 
 import { WithContext as ReactTags } from 'react-tag-input';
+import { size } from 'polished';
 
 const KeyCodes = {
   comma: 188,
@@ -70,13 +71,17 @@ class Dashboard extends Component {
             searchSuggestions: [],
             searchValue: "",
             showSuggestions:false,
+            selectingMember:false,
+            wishlist: [],
             error:'',
             addItem:false,
             addingItem: false,
             itemTitle: "",
             itemURL: "",
             itemCategories: [],
-            itemMaxCost: 0
+            itemMaxCost: 0,
+            myWishList: true,
+            currentMember: null
         };
 
         this.handleDelete = this.handleDelete.bind(this);
@@ -140,7 +145,16 @@ class Dashboard extends Component {
                 this.setState({error: data.msg});
             }
             else {
-                this.setState({members:data.members})
+                var myData = {
+                    firstname: this.props.data.firstname,
+                    lastname: this.props.data.lastname,
+                    dob: this.props.data.dob,
+                    avatar: this.props.data.avatar,
+                    email: '',
+                    myData: true
+                };
+                data.members.unshift(myData);
+                this.setState({members:data.members, currentMember: myData})
             }
         }) 
         .catch(err => {
@@ -151,7 +165,7 @@ class Dashboard extends Component {
     }
 
     loadWishList() {
-        this.setState({loadingWishlist: false});
+        this.setState({loadingWishlist: false, wishlist: this.props.data.wishlist});
     }
 
     componentDidMount() {
@@ -163,8 +177,32 @@ class Dashboard extends Component {
         }
     }    
 
-    selectMember(member) {
-        console.log("SELECTED MEMBER", member)
+    selectMember(email, member) {
+        this.setState({selectingMember: true, currentMember: member});
+        fetch('/api/wish/' + email, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',  // It can be used to overcome cors errors
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => {
+            this.setState({selectingMember: false});
+            return res.json();
+        })
+        .then(data => {
+            console.log("MEMBERS DATA ", data)
+            if ('error' in data) {
+                this.setState({error: data.msg});
+            }
+            else {
+                this.setState({wishlist:data.wishlist})
+            }
+        }) 
+        .catch(err => {
+            console.log('Error selecting member', err);
+            alert('Error selecting memeber please try again');
+        });
     }
 
     updateSuggestions(value) {
@@ -190,12 +228,68 @@ class Dashboard extends Component {
     submitWish() {
         console.log("WISH", this.state)
 
-        if (this.isNumeric(this.state.itemMaxCost)) {
-
-        }
-        else {
+        if (!this.isNumeric(this.state.itemMaxCost)) {
             this.setState({error:"Max Cost must be a valid price."})
         }
+
+        if (this.state.itemTitle === "" || this.state.itemURL === "" || this.state.itemMaxCost === "") {
+            this.setState({error:"Fill out all fields."})
+        }
+
+        var maxCost = parseFloat(this.state.itemMaxCost);
+        var tags = this.state.itemCategories.map(function(item) {
+            return item['text'];
+        });
+        var wish = {
+            title: this.state.itemTitle,
+            url: this.state.itemURL,
+            maxCost: maxCost,
+            tags: tags
+        };
+
+        this.setState({addingItem: false, itemCategories:[], itemMaxCost:"", itemTitle:"", itemURL:""});
+        this.addToMyList(wish);
+    }
+
+    deleteWish(wish) {
+        fetch('/api/wish/'+wish._id, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',  // It can be used to overcome cors errors
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => {
+            return res.json();
+        })
+        .then(data => {
+            this.props.data.reloadWishlist();
+        }) 
+        .catch(err => {
+            console.log("Error adding wish, ", err);
+            alert('Error adding wish to list');
+        });
+    }
+
+    addToMyList(wish) {
+        fetch('/api/wish', {
+            method: 'POST',
+            body: JSON.stringify(wish),
+            headers: {
+                'Accept': 'application/json, text/plain, */*',  // It can be used to overcome cors errors
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => {
+            return res.json();
+        })
+        .then(data => {
+            this.props.data.reloadWishlist();
+        }) 
+        .catch(err => {
+            console.log("Error adding wish, ", err);
+            alert('Error adding wish to list');
+        });
     }
 
     render() {    
@@ -237,7 +331,11 @@ class Dashboard extends Component {
                                 justify="start"
                                 align="center"
                                 gap="medium"
-                                onClick={() => this.selectMember(member)}
+                                onClick={() => {
+                                    if (member.myData) this.setState({myWishList:true});
+                                    else this.setState({myWishList:false});
+                                    this.selectMember(member.email, member);
+                                }}
                                 key={member.lastname+member.dob+"-search"}
                             >
                                 <Avatar 
@@ -293,7 +391,11 @@ class Dashboard extends Component {
                                 className="hover-button"
                                 pad="small"
                                 round="8px"
-                                onClick={() => this.selectMember(member)}
+                                onClick={() => {
+                                    if (member.myData) this.setState({myWishList:true});
+                                    else this.setState({myWishList:false});
+                                    this.selectMember(member.email, member);
+                                }}
                                 key={member.lastname+member.dob}
                             >    
                                 <Box
@@ -343,56 +445,187 @@ class Dashboard extends Component {
             }
         </Box>;
 
-        var content = 
-        <Box
-            direction="column"
-            justify="start"
-            flex="grow"
-            pad="small"
-        >
-            <ResponsiveContext.Consumer>
-                {responsive =>
+        var content = (responsive) => {
+        return (
+            <Box
+                direction="column"
+                justify="start"
+                flex="grow"
+                pad="small"
+            >
+                <Box
+                    width="100%"
+                    height="100%"
+                    direction={responsive === "small" ? "column-reverse":"column"}
+                    gap="medium"
+                >
                     <Box
                         width="100%"
-                        height="100%"
-                        flex="grow"
-                        direction={responsive === "small" ? "column-reverse":"column"}
-                        gap="medium"
+                        direction={responsive === "small" ? "row-reverse":"row"}
+                        pad="small"
+                        gap="large"
+                        align="center"
                     >
                         <Box
-                            width="100%"
-                            direction={responsive === "small" ? "row-reverse":"row"}
-                            pad="small"
+                            height="30px"
+                            onClick={() => this.setState({addItem:true})}
+                            pad={{
+                                "left":"medium",
+                                "right":"medium",
+                                "top":"small",
+                                "bottom":"small",
+                            }}
+                            background="#000"
+                            direction="row"
+                            justify="center"
+                            align="center"
+                            round="50px"
                         >
+                            <Text color="#eee" size="small">Add item</Text>
+                        </Box>
+                        {this.state.currentMember && 
                             <Box
                                 height="30px"
-                                onClick={() => this.setState({addItem:true})}
-                                pad="medium"
-                                background="#000"
                                 direction="row"
                                 justify="center"
                                 align="center"
-                                round="50px"
+                                gap="small"
                             >
-                                <Text color="#eee" size="small">Add item</Text>
+                                <Text color={this.props.data.color2} size="xlarge">{this.props.data.getNameAlt(this.state.currentMember.firstname)}'s</Text>
+                                <Text color={this.props.data.color3} size="xlarge">list</Text>
                             </Box>
-                        </Box>
-                        <Box
-                            width="100%"
-                            height="100%"
-                            overflow={{"vertical":"auto"}}
-                            pad={{"left":"5px"}}
-                        >
-                            {(!this.props.data.wishlist || this.props.data.wishlist.length == 0) && 
-                                <Text color={this.props.data.color4} size="xlarge" >There is nothing in your wish list.</Text>
-                            }
-                        </Box>
-
+                        }
                     </Box>
-                }
-            </ResponsiveContext.Consumer>
+                    <Box
+                        width="100%"
+                        height="100%"
+                        overflow={{"vertical":"auto"}}
+                        pad={{"left":"5px"}}
+                    >
+                        {(!this.state.wishlist || this.state.wishlist.length == 0) && 
+                            <Text color={this.props.data.color4} size="xlarge" >There is nothing in this wish list.</Text>
+                        }
+
+                        {this.state.wishlist.map((wish, i) => {
+                            return (
+                                <Box
+                                    width="100%"
+                                    height={{"min":"80px"}}
+                                    key={"wish-" + wish.url + "-" + i}
+                                    direction="row"
+                                    justify="start"
+                                    align="center"
+                                    className="hover-button"
+                                    pad = "small"
+                                    gap="small"
+                                    round="12px"
+                                >
+                                    
+                                    <Box
+                                        width={{"min": "25px"}}
+                                        height={{"min": "25px"}}
+                                        pad="2px"
+                                        direction="row"
+                                        justify="center"
+                                        align="center"
+                                        round="12px"
+                                        border={{
+                                            color:"#777",
+                                            side:"all",
+                                            size: "0px"
+                                        }}
+                                        onClick={() => this.state.myWishList ? this.deleteWish(wish) : this.addToMyList(wish)}
+                                        className="highligh hover-button-red"
+                                    >
+                                        { this.state.myWishList ? <Close color="#777" size="15px" /> : <Add color="#777" size="15px" />}
+                                    </Box>
+                                    
+                                    <Box
+                                        direction="column"
+                                        justify="start"
+                                        align="start"
+                                        gap="small"
+                                        height="100%"
+                                        flex="grow"
+                                        pad="xsmall"
+                                    >
+                                        <Box
+                                            direction="row"
+                                            gap="medium"
+                                            align="center"
+                                            justify="start"
+                                        >
+                                            <Box width={{"min": "160px"}} onClick={() => window.open(wish.url, "_blank")}><Text>{wish.title}</Text></Box>
+                                            <Box
+                                                width={{"min": "80px"}}
+                                                background={this.props.data.color2}
+                                                pad={{
+                                                    "top":"2px",
+                                                    "bottom":"2px",
+                                                    "left":"12px",
+                                                    "right":"12px",
+
+                                                }}
+                                                round="2px"
+                                                direction="row"
+                                                justify="center"
+                                                align="center"
+                                                onClick={() => {
+
+                                                    const el = document.createElement('textarea');
+                                                    el.value = wish.url;
+                                                    document.body.appendChild(el);
+                                                    el.select();
+                                                    el.setSelectionRange(0, 99999);;
+                                                    document.execCommand('copy');
+                                                }}
+                                            >
+                                                <Text size="12px">Copy link</Text>
+                                            </Box>
+
+                                            {responsive === "large" &&
+                                                <Text onClick={(e) => {console.log(e)}} size="12px" color={this.props.data.color4}>{wish.url.substring(0, 100)} {wish.url.length > 100 ? "..." : ""}</Text> 
+                                            }
+                                        </Box>
+                                        <Box
+                                            direction="row"
+                                            gap="small"
+                                            align="center"
+                                            justify="start"
+
+                                        >
+                                            {wish.tags.map((tag, i) => {
+                                                return (
+                                                    <Box
+                                                        background="#e0dbc3"
+                                                        pad={{
+                                                            "top":"2px",
+                                                            "bottom":"2px",
+                                                            "left":"12px",
+                                                            "right":"12px",
         
-        </Box>
+                                                        }}
+                                                        round="2px"
+                                                        direction="row"
+                                                        justify="center"
+                                                        align="center"
+                                                        key={"wish-tag-" + i + "-" + wish.url}
+                                                        
+                                                        round="2px"
+                                                    >
+                                                        <Text size="12px" color={this.props.data.color3}>{tag}</Text>
+                                                    </Box>
+                                                )
+                                            })}
+                                        </Box>
+                                    </Box>
+                                </Box>
+                            )
+                        })}
+                    </Box>
+                </Box>
+            </Box>
+        )};
 
         return (
             
@@ -400,9 +633,9 @@ class Dashboard extends Component {
                 width="100vw"
                 height="100vh"
             >
-                {!this.state.addItem && 
-                    <Layer animation="fadeIn" modal={true} round="10px">
-                        <Box width="100%" height="100%" background="none" align="start" justify="center" pad="none" direction="column" round="10px">
+                {this.state.addItem && 
+                    <Layer animation="fadeIn" modal={true}>
+                        <Box width="100%" height="100%" background="none" align="start" justify="center" pad="none" direction="column">
                             <Box
                                 width="800px"
                                 height={{"min":"130px"}}
@@ -410,6 +643,7 @@ class Dashboard extends Component {
                                 pad="medium"
                                 direction="row"
                                 align="center"
+                                round={{"size":"4px", "corner":"top"}}
                             >
                                 <Text margin="small" color={this.props.data.color1} size="xxlarge">Wish list item</Text>
                             </Box>
@@ -447,11 +681,13 @@ class Dashboard extends Component {
                                         onChange={event => {this.setState({itemMaxCost: event.target.value});}}
                                     />
                                 </FormField>
-                                <FormField height={{"min":"90px"}} name="tags" label="Item categories" width="700px">
+                                <FormField height={{"min":"120px"}} name="tags" label="Item categories" width="700px">
 
                                     <Box
                                         direction="row"
                                         gap="small"
+                                        overflow={{"vertical":"auto"}}
+                                        margin={{"bottom":"3px"}}
                                     >
                                         <ReactTags 
                                             tags={this.state.itemCategories}
@@ -472,7 +708,12 @@ class Dashboard extends Component {
                                     <Box
                                         height="30px"
                                         onClick={() => this.submitWish()}
-                                        pad="medium"
+                                        pad={{
+                                            "left":"medium",
+                                            "right":"medium",
+                                            "top":"small",
+                                            "bottom":"small",
+                                        }}
                                         background="#000"
                                         direction="row"
                                         justify="center"
@@ -490,13 +731,18 @@ class Dashboard extends Component {
                                     <Box
                                         height="30px"
                                         onClick={() => this.setState({addItem:false})}
-                                        pad="medium"
+                                        pad={{
+                                            "left":"medium",
+                                            "right":"medium",
+                                            "top":"small",
+                                            "bottom":"small",
+                                        }}
                                         background="none"
                                         direction="row"
                                         justify="center"
                                         align="center"
                                         round="50px"
-                                        border="small"
+                                        border={{ color: "#000", side: 'all' }}
                                     >
                                         <Text color="#000" size="small">Close</Text>
                                     </Box>
@@ -516,10 +762,10 @@ class Dashboard extends Component {
                                 height={{"min":"100%"}} 
                                 direction="column" 
                                 gap="small"
-                                align="center"
+                                align="stretch"
                             >
                                 {searchbar}
-                                {content}
+                                {content(responsive)}
                             </Box>
                         ) : (
                             <Box 
@@ -533,7 +779,7 @@ class Dashboard extends Component {
                                 
                             >
                                 {sidebar}
-                                {content}
+                                {content(responsive)}
                             </Box>
                         )
                     }

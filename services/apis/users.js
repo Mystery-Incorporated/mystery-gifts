@@ -39,7 +39,9 @@ function createSession(req, res, data) {
             lastname: data.lastname,
             username: data.username,
             avatar: data.avatar,
-            verified: data.verified
+            verified: data.verified,
+            wishlist: data.wishlist,
+            dob: data.dob
         });        
     });
 }
@@ -137,7 +139,6 @@ function sendEmail(email, token, req, res) {
 }
 
 function createUser(data, callback) {
-    console.log(data);
     var salt = bcrypt.genSaltSync(15);
     var pass = bcrypt.hashSync(data.password, salt);
     var user = {
@@ -176,6 +177,7 @@ function resetPass(email, formData, callback) {
                     username: data.username,
                     avatar: data.avatar,
                     dob: data.dob,
+                    wishlist: data.wishlist,
                     password: formData.password,
                     verified: true
                 };
@@ -197,6 +199,17 @@ function decodeCookie(req) {
     var decoded = jwt.verify(token, process.env.SECRET);
 
     return {email: decode(decoded.emailHash), id: decode(decoded.hashedID)};
+}
+
+function addWish(email, formData, callback) {
+
+    Users.updateOne({ email: email }, { $push: {wishlist: {
+        url:formData.url,
+        tags: formData.tags,
+        title: formData.title,
+        maxCost: formData.maxCost
+    }} }, callback);
+
 }
 
 module.exports = function(app) {
@@ -265,7 +278,6 @@ module.exports = function(app) {
         }
         else {
             findByEmail(formData.email, (err, data) => {
-                console.log(data);
                 return login(err, data, formData.password, req, res);
             });
         }
@@ -280,8 +292,6 @@ module.exports = function(app) {
         }
         else {
             resetPass(decoded.email, formData, (err, data) => {
-                console.log(err, data);
-
                 if (err) {
                     return res.status(400).json({ err: err });
                 }
@@ -303,7 +313,8 @@ module.exports = function(app) {
                 username: data.username,
                 avatar: data.avatar,
                 verified: data.verified,
-                wishlist: data.wishlist
+                wishlist: data.wishlist,
+                dob: data.dob
             });
         });
     });
@@ -335,7 +346,8 @@ module.exports = function(app) {
                     username: data.username,
                     avatar: data.avatar,
                     verified: data.verified,
-                    wishlist: data.wishlist
+                    wishlist: data.wishlist,
+                    dob: data.dob
                 };
                 return res.status(200).json({ data: result });
             }
@@ -354,6 +366,70 @@ module.exports = function(app) {
             }
             else {
                 return res.status(200).json({  username: formData.username });
+            }
+        });
+    });
+
+
+    app.get('/api/wish', withAuth, function(req, res) {
+        var decoded = decodeCookie(req);
+        var email = decoded.email;
+
+        var formData = req.body;
+
+        findByEmail(email, (err, data) => {
+            if (err || !data) {
+                return res.status(400).json({ error: 1, msg: "Bad data, could not add wish!" });
+            }
+            else {
+                return res.status(200).json({  wishlist: data.wishlist });
+            }
+        });
+    });
+
+    app.get('/api/wish/:email', withAuth, function(req, res) {
+
+        var email = req.params.email
+
+        findByEmail(email, (err, data) => {
+            if (err || !data) {
+                return res.status(400).json({ error: 1, msg: "Bad data, could not add wish!" });
+            }
+            else {
+                return res.status(200).json({  wishlist: data.wishlist });
+            }
+        });
+    });
+
+    app.post('/api/wish', withAuth, function(req, res) {
+        var decoded = decodeCookie(req);
+        var email = decoded.email;
+
+        var formData = req.body;
+
+        addWish(email, formData, (err, data) => {
+            if (err || !data) {
+                return res.status(400).json({ error: 1, msg: "Bad data, could not add wish!" });
+            }
+            else {
+                return res.status(200).json({  msg: "Success" });
+            }
+        });
+    });
+
+    app.delete('/api/wish/:id', withAuth, function(req, res) {
+        var decoded = decodeCookie(req);
+        var email = decoded.email;
+
+        var id = req.params.id
+
+        Users.updateOne({ email: email }, { $pull: {wishlist: {_id: id}} }, (err, data) => {
+            console.log(err, data)
+            if (err || !data) {
+                return res.status(400).json({ error: 1, msg: "Bad data, could not add wish!" });
+            }
+            else {
+                return res.status(200).json({  msg: "Success" });
             }
         });
     });

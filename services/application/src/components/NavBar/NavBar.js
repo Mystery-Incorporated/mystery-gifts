@@ -88,7 +88,7 @@ class NavBar extends Component {
                             </Box>
                             <Nav 
                                 direction="row"
-                                gap="xsmall"   
+                                gap="small"   
                                 margin={{"right":"15px"}} 
                             >
                                 <Box 
@@ -128,84 +128,21 @@ class NavBar extends Component {
                                     dropProps={{ align: { top: 'bottom', left: 'left' } }}
                                     items={[]}
                                 />
+
+                                <Box 
+                                    direction="row" 
+                                    align="center" 
+                                    gap="small"
+                                    pad="0"
+                                    round="50px"
+                                    onClick={() => {this.props.history.push("/logout")}}
+                                >
+                                    <Box pad="xsmall" className="hover-button" direction="row" justify="center" align="center" round="50px" className="hover-button">
+                                        <Logout color={this.props.data.color3} size={responsive === "small" ? "15px" : "20px"} />
+                                    </Box>
+                                </Box>
                                 
-                                <Menu
-                                    size="large"
-                                    children={(props) => <Box pad="xsmall" className="hover-button" round="50px"><FormDown size={responsive === "small" ? "15px" : "20px"} /></Box>}
-                                    plain
-                                    dropAlign={{left: 'right', top: 'bottom'}}
-                                    dropProps={{ align: { top: 'bottom', left: 'left' } }}
-                                    items={[
-                                        {
-                                            label: 
-                                                <Box
-                                                    alignSelf="center"
-                                                    direction="column"
-                                                    align="start"
-                                                    justify="center"
-                                                    pad={{"left":"medium", "right":"medium"}}
-                                                >
-                                                    <Text size="small" color={this.props.data.color3}>
-                                                        {this.props.data.getFullName()}
-                                                    </Text>
-                                                    <Text
-                                                        color={this.props.data.color2}
-                                                        size="xsmall"
-                                                    >
-                                                        See your profile
-                                                    </Text>
-                                                </Box>
-                                            ,
-                                            href: "/user/" + this.props.data.username,
-                                            icon: 
-                                                <Avatar 
-                                                    name={this.props.data.getFullName()}
-                                                    src={this.props.data.avatar} 
-                                                    size="35" 
-                                                    round={true}
-                                                />
-                                            ,
-                                        },
-                                        {
-                                            label: 
-                                                <Box
-                                                    alignSelf="center"
-                                                    direction="column"
-                                                    align="start"
-                                                    justify="center"
-                                                    pad={{"left":"medium", "right":"medium"}}
-                                                >
-                                                    <Text size="small" color={this.props.data.color3}>
-                                                        Settings
-                                                    </Text>
-                                                </Box>
-                                            ,
-                                            onClick: () => {},
-                                            icon: (
-                                                <Box margin="8px"><Configure color={this.props.data.color3} size='20px'/></Box>
-                                            ),
-                                        },
-                                        {
-                                            label: 
-                                                <Box
-                                                    alignSelf="center"
-                                                    direction="column"
-                                                    align="start"
-                                                    justify="center"
-                                                    pad={{"left":"medium", "right":"medium"}}
-                                                >
-                                                    <Text size="small" color={this.props.data.color3}>
-                                                        Logout
-                                                    </Text>
-                                                </Box>
-                                            ,
-                                            href: "/logout",
-                                            icon: (
-                                                <Box margin="8px"><Logout color={this.props.data.color3} size='20px' /></Box>
-                                            ),
-                                        },
-                                    ]}
-                                />
+                                
                             </Nav>
                         </Box>
 

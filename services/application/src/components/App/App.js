@@ -19,6 +19,7 @@ class App extends Component {
             firstname: '',
             lastname: '',
             avatar: '',
+            dob:'',
             wishlist: [],
             username: ''
         };
@@ -33,10 +34,13 @@ class App extends Component {
         this.formatDateTime = this.formatDateTime.bind(this);
         this.formatHumanDate = this.formatHumanDate.bind(this);
         this.getRemainingDays = this.getRemainingDays.bind(this);
+        this.reloadWishlist = this.reloadWishlist.bind(this);
+        this.reload = this.reload.bind(this);
+        this.verify = this.verify.bind(this);
     }
 
     login(data) {
-        this.setState({isLoggedIn: true, firstname:data.firstname, lastname:data.lastname, verified:data.verified, avatar: data.avatar, username: data.username});
+        this.setState({isLoggedIn: true, firstname:data.firstname, lastname:data.lastname, verified:data.verified, avatar: data.avatar, username: data.username, wishlist:data.wishlist, dob:data.dob});
     }
 
     logout() {
@@ -47,6 +51,7 @@ class App extends Component {
             firstname: '',
             lastname: '',
             avatar: '',
+            dob:'',
             wishlist: [],
             username: ''
         });
@@ -60,6 +65,17 @@ class App extends Component {
     componentDidMount() {
         this._isMounted = true;
 
+        if (this._isMounted) this.reload()
+        
+    }
+
+    verify() {
+
+        this.setState({verified: true});
+        
+    }
+
+    reload() {
         fetch('/api/checkToken', {
             headers: {
                 'Accept': 'application/json, text/plain, */*',  // It can be used to overcome cors errors
@@ -88,12 +104,39 @@ class App extends Component {
                         username: data.username,
                         avatar: data.avatar,
                         wishlist: data.wishlist,
+                        dob:data.dob,
                         msg: "USER LOGGED IN!",
                         isLoggedIn:true,
                         loading:false,
                         verified: data.verified
                     });
+                    console.log("RELOADING: ", data);
                 }
+            }
+            
+        }) 
+        .catch(err => {
+            console.error(err);
+            alert('Error checking token');
+        });
+    }
+
+    reloadWishlist() {
+        fetch('/api/wish', {
+            headers: {
+                'Accept': 'application/json, text/plain, */*',  // It can be used to overcome cors errors
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => {
+            if (res.status === 200) {
+                return res.json();
+            }
+        })
+        .then(data => {
+            console.log("RELOADING WISHES, ", data);
+            if (data) {
+                this.setState({wishlist: data.wishlist});
             }
             
         }) 
@@ -199,6 +242,9 @@ class App extends Component {
             formatDateTime:this.formatDateTime,
             formatHumanDate:this.formatHumanDate,
             getRemainingDays:this.getRemainingDays,
+            reloadWishlist:this.reloadWishlist,
+            reload:this.reload,
+            verify:this.verify,
             firstname:this.state.firstname,
             lastname:this.state.lastname,
             username:this.state.username,
@@ -206,6 +252,7 @@ class App extends Component {
             verified:this.state.verified,
             isLoggedIn:this.state.isLoggedIn,
             wishlist:this.state.wishlist,
+            dob:this.state.dob,
             color1: '#fff',
             color2: '#58b1ed',
             color3: '#555',
