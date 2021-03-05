@@ -76,7 +76,13 @@ class Home extends Component {
             global: {
               colors: {
                 custom: this.props.data.color1
+              },
+              focus: {
+                  border: {
+                      color: "none"
+                  }
               }
+              
             }
         };
 

@@ -19,6 +19,7 @@ class App extends Component {
             firstname: '',
             lastname: '',
             avatar: '',
+            wishlist: [],
             username: ''
         };
 
@@ -30,6 +31,8 @@ class App extends Component {
         this.formatDOB = this.formatDOB.bind(this);
         this.formatDate = this.formatDate.bind(this);
         this.formatDateTime = this.formatDateTime.bind(this);
+        this.formatHumanDate = this.formatHumanDate.bind(this);
+        this.getRemainingDays = this.getRemainingDays.bind(this);
     }
 
     login(data) {
@@ -44,6 +47,7 @@ class App extends Component {
             firstname: '',
             lastname: '',
             avatar: '',
+            wishlist: [],
             username: ''
         });
 
@@ -83,6 +87,7 @@ class App extends Component {
                         lastname: data.lastname,
                         username: data.username,
                         avatar: data.avatar,
+                        wishlist: data.wishlist,
                         msg: "USER LOGGED IN!",
                         isLoggedIn:true,
                         loading:false,
@@ -123,6 +128,16 @@ class App extends Component {
         }
     }
 
+    formatHumanDate(d) {
+        if (d) {
+            var date = Date.parse(d);
+            var options = { month: 'long', day: 'numeric' };
+            var dateSplit =  new Intl.DateTimeFormat('en-US', options).format(date).split(" ");
+
+            return dateSplit[1] + this.nth(dateSplit[1]) + " of " + dateSplit[0];
+        }
+    }
+
     getName() {
         return this.getNameAlt(this.state.firstname);
     }
@@ -138,7 +153,35 @@ class App extends Component {
     }
 
     getFullName() {
-        return this.getNameAlt(this.state.firstname) + " " + this.getNameAlt(this.state.lastname);;
+        return this.getNameAlt(this.state.firstname) + " " + this.getNameAlt(this.state.lastname);
+    }
+
+    getRemainingDays(dob) {
+
+        if (dob) {
+            var birthday = new Date(dob);
+            var today = new Date();
+
+                birthday.setFullYear(today.getFullYear());
+            if (today > birthday) {
+                birthday.setFullYear(today.getFullYear() + 1);
+            }
+
+            return Math.floor((birthday - today) / (1000*60*60*24))
+        }
+        else {
+            return 0;
+        }
+    }
+
+    nth(d) {
+        if (d > 3 && d < 21) return 'th';
+        switch (d % 10) {
+            case 1:  return "st";
+            case 2:  return "nd";
+            case 3:  return "rd";
+            default: return "th";
+        }
     }
 
 
@@ -154,15 +197,19 @@ class App extends Component {
             formatDOB:this.formatDOB,
             formatDate:this.formatDate,
             formatDateTime:this.formatDateTime,
+            formatHumanDate:this.formatHumanDate,
+            getRemainingDays:this.getRemainingDays,
             firstname:this.state.firstname,
             lastname:this.state.lastname,
             username:this.state.username,
             avatar:this.state.avatar,
             verified:this.state.verified,
             isLoggedIn:this.state.isLoggedIn,
+            wishlist:this.state.wishlist,
             color1: '#fff',
             color2: '#58b1ed',
-            color3: '#555'
+            color3: '#555',
+            color4: '#aaa'
         };
 
         var content = this.state.loading ? <Loading /> :
