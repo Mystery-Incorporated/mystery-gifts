@@ -109,8 +109,8 @@ applicationBak\*
 .env
 
 # ASSETS
-#application/public/*.png
-#application/public/bundle.js
-#application/public/bundle.js*
+application/public/*.png
+application/public/bundle.js
+application/public/bundle.js*
 
 env_vars.yaml
