@@ -25,6 +25,19 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded( {extended: true} ));
 
 app.use(helmet());
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: [
+                "'self'",
+                'https://fonts.googleapis.com',
+            ],
+            fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+            baseUri: ["'self'"],
+        },
+    })
+);
 // app.use(
 //     helmet({
 //       contentSecurityPolicy: false,
