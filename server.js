@@ -10,6 +10,9 @@ var socket = require('socket.io');
 const cookieParser = require('cookie-parser');
 var shortid = require('shortid');
 var morgan = require('morgan');
+var helmet = require('helmet');
+
+
 
 // bundler
 const webpackDevMiddleware = require('webpack-dev-middleware');
@@ -21,6 +24,14 @@ app.use(morgan('dev'));
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded( {extended: true} ));
+
+app.use(helmet());
+// app.use(
+//     helmet({
+//       contentSecurityPolicy: false,
+//     })
+// );
+
 mongoose.Promise = global.Promise;
 
 // The main instance of HTTP server
@@ -28,15 +39,6 @@ var server = require('http').Server(app);
 var io = socket(server);
 
 app.use(express.static(path.join(__dirname, '/application/public')));
-// app.use(webpackDevMiddleware(compiler, {
-//     hot: true,
-//     filename: 'bundle.js',
-//     publicPath: '/',
-//     stats: {
-//         colors: true,
-//     },
-//     historyApiFallback: true,
-// }));
 
 // Added for exposing our server instance to the test suite
 module.exports = server;
@@ -56,8 +58,10 @@ var port = 8080;
 
 // APIs go here
 const user = require('./apis/users.js')(app);
+const wishlist = require('./apis/wishlist.js')(app);
 const withAuth = require('./apis/middleware');
 const UserAPI = require('./models/User.js')
+const WishlistAPI = require('./models/Wishlist.js')
 // Listeners
 io.on('connection', socket => {
     socket.on('test', (arg1, arg2) => {
@@ -93,33 +97,6 @@ app.get('/*', (req, res) => {
         if (err) res.status(500).send(err);
     });
 });
-
-app.post('/api/testingg', (req, res) => {
-    var user = new UserAPI({
-        playerTag: req.body.tag,
-        email: req.body.email,
-        password: req.body.pass,
-        playerNickName:req.body.tag
-    });
-
-    user.save((err, user) => {
-        if (err) {
-            res.status(400)
-                .json({
-                    status: 'error',
-                    data: {},
-                    message: err
-            });
-        } else {
-            res.status(200)
-            .json({
-                status: 'success',
-                data: user,
-                message: 'k'
-            });
-        }
-    })
-})
 
 // Start listening for requests
 server.listen(process.env.PORT || port, function () {

@@ -119,6 +119,8 @@ class Reset extends Component {
                     }
                     else {
                         console.log("!getting here");
+                        this.props.data.reload();
+                        this.props.data.verify();
                         this.props.history.push('/');
                     }
                 }) 

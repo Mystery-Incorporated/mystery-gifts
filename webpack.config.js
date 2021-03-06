@@ -9,6 +9,7 @@ const htmlWebpackPlugin = new HtmlWebPackPlugin({
 });
 
 module.exports = {
+    devtool: "source-map",
     context: path.join(__dirname, '/application/src'),
     entry: [
         './index.js'
@@ -67,7 +68,10 @@ module.exports = {
                 target: 'http://localhost:8080',
                 ws: true
             }
-        }
+        },
+        contentBase: './'
     },
-    plugins: [htmlWebpackPlugin]
+    plugins: [
+        htmlWebpackPlugin
+    ]
 }; 

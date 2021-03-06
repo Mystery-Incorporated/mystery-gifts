@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: #ffffff;
+}
+
+* {
+    font-family: 'Roboto', sans-serif;
+    transition-duration: 0.25s !important;
+}
+
+.ReactTags__tags {
+
+    background-color: none;
+    margin: 5px 0 5px 0px;
+
+}
+
+.hover-button:hover {
+    background: rgb(217, 223, 230);
+}
+
+.hover-button:hover .highlight {
+    border-color: #444;
+}
+
+.hover-button:hover .highlight *{
+   fill: #444;
+   stroke: #444;
+}
+
+.hover-button-red:hover {
+    fill: rgb(226, 103, 103);
+    stroke: rgb(226, 103, 103);
+}
+
+.hover-button-red:hover *{
+   fill: rgb(226, 103, 103);
+   stroke: rgb(226, 103, 103);
+}
+
+
+
+/* Styles for the input */
+.ReactTags__tagInput {
+    width: 150px;
+    border-radius: 2px;
+    display: inline-block;
+    padding: 1px 5px 1px 5px;
+}
+
+.ReactTags__tagInput:focus {
+    border: none;
+}
+
+.ReactTags__tagInput input.ReactTags__tagInputField {
+    width: 150px;
+    height: 31px;
+    margin: 0;
+    font-size: 12px;
+    width: 100%;
+    border: none;
+    padding: 0px 3px 0px 3px;
+    outline: none;
+    border-radius: 2px;
+    border-bottom: 2px solid rgb(82, 236, 82);
+}
+
+.ReactTags__tagInput input.ReactTags__tagInputField:focus {
+    outline: none;
+    border-bottom: 2px solid rgb(82, 236, 82);
+}
+
+/* Styles for selected tags */
+.ReactTags__selected span.ReactTags__tag {
+    border: 1px dotted rgb(151, 151, 144);
+    background: rgb(236, 236, 231);
+    font-size: 12px;
+    display: inline-block;
+    padding: 3px 5px 3px 5px;
+    margin: 3px;
+    border-radius: 3px;
+}
+.ReactTags__selected a.ReactTags__remove {
+    color: none;
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+.ReactTags__remove {
+    border: none;
+    cursor: pointer;
+    background: none;
+}

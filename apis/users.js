@@ -39,7 +39,9 @@ function createSession(req, res, data) {
             lastname: data.lastname,
             username: data.username,
             avatar: data.avatar,
-            verified: data.verified
+            verified: data.verified,
+            wishlist: data.wishlist,
+            dob: data.dob
         });        
     });
 }
@@ -137,7 +139,6 @@ function sendEmail(email, token, req, res) {
 }
 
 function createUser(data, callback) {
-    console.log(data);
     var salt = bcrypt.genSaltSync(15);
     var pass = bcrypt.hashSync(data.password, salt);
     var user = {
@@ -176,6 +177,7 @@ function resetPass(email, formData, callback) {
                     username: data.username,
                     avatar: data.avatar,
                     dob: data.dob,
+                    wishlist: data.wishlist,
                     password: formData.password,
                     verified: true
                 };
@@ -199,60 +201,68 @@ function decodeCookie(req) {
     return {email: decode(decoded.emailHash), id: decode(decoded.hashedID)};
 }
 
+function addWish(email, formData, callback) {
+
+    Users.updateOne({ email: email }, { $push: {wishlist: {
+        url:formData.url,
+        tags: formData.tags,
+        title: formData.title,
+        maxCost: formData.maxCost
+    }} }, callback);
+
+}
+
 module.exports = function(app) {
-    // app.post('/api/signup', (req, res) => {
-    //     var formData = req.body;
-    //     if (!formData.email || !formData.username || !formData.password || !formData.firstname || !formData.lastname || !formData.dob) {
-    //         return res.status(400).json({ error: 1, msg: "Missing fields." });
-    //     }
-    //     else {
-    //         findByEmail(formData.email, (err, data) => {
-    //             if (err || !data) {
-    //                 // email doesn't exist we are good
-    //                 findByUsername(formData.username, (err, data) => {
-    //                     if (err || !data) {
-    //                         // tag doesn't exist we are good
-    //                         createUser(formData, (err, data) => {
-    //                             if (err) {
-    //                                 console.log(err)
-    //                                 var errType = err.name;
-    //                                 if (errType === 'ValidationError') {
-    //                                     // go through each error ( there will only be one but still)
-    //                                     var msg = ""
-    //                                     var validationErrors = err.errors;
-    //                                     for (var error in validationErrors) {
-    //                                         if (validationErrors[error].kind === 'minlength') {
-    //                                             msg += 'Username needs to be atleast 4 characters long. '
-    //                                         } else {
-    //                                             msg += 'Username cannot contain any special symbols other than _ or -. '
-    //                                         }
-    //                                     }
-    //                                     return res.status(400).json({error: err, msg:msg});
-    //                                 } else {
-    //                                     return res.status(400).json({error: err, msg:"Failed to create user."});
-    //                                 }
-    //                             } else {
-    //                                 var userData = {
-    //                                     username: data.username,
-    //                                     email: data.email
-    //                                 }
-    //                                 return createSession(req, res, userData);
-    //                             }
-    //                         });
-    //                     } 
-    //                     else {
-    //                         return res.status(400).json({ error: 1, msg: "Username exists" });
-    //                     }
-    //                 });
-    //             } 
-    //             else {
-    //                 return res.status(400).json({ error: 1, msg: "Email exists" });
-    //             }
+
+    ///// DISABLED
+    app.post('/api/signup', withAuth, (req, res) => {
+        var formData = req.body;
+        if (!formData.email || !formData.username || !formData.password || !formData.firstname || !formData.lastname || !formData.dob) {
+            return res.status(400).json({ error: 1, msg: "Missing fields." });
+        }
+        else {
+            findByEmail(formData.email, (err, data) => {
+                if (err || !data) {
+                    // email doesn't exist we are good
+                    findByUsername(formData.username, (err, data) => {
+                        if (err || !data) {
+                            // tag doesn't exist we are good
+                            createUser(formData, (err, data) => {
+                                if (err) {
+                                    var errType = err.name;
+                                    if (errType === 'ValidationError') {
+                                        // go through each error ( there will only be one but still)
+                                        var msg = ""
+                                        var validationErrors = err.errors;
+                                        for (var error in validationErrors) {
+                                            if (validationErrors[error].kind === 'minlength') {
+                                                msg += 'Username needs to be atleast 4 characters long. '
+                                            } else {
+                                                msg += 'Username cannot contain any special symbols other than _ or -. '
+                                            }
+                                        }
+                                        return res.status(400).json({error: err, msg:msg});
+                                    } else {
+                                        return res.status(400).json({error: err, msg:"Failed to create user."});
+                                    }
+                                } else {
+                                    return res.status(200).json({ data });
+                                }
+                            });
+                        } 
+                        else {
+                            return res.status(400).json({ error: 1, msg: "Username exists" });
+                        }
+                    });
+                } 
+                else {
+                    return res.status(400).json({ error: 1, msg: "Email exists" });
+                }
                 
-    //         });
-    //     }
+            });
+        }
         
-    // });
+    });
 
 
     app.post('/api/signout', (req, res) => {
@@ -267,7 +277,6 @@ module.exports = function(app) {
         }
         else {
             findByEmail(formData.email, (err, data) => {
-                console.log(data);
                 return login(err, data, formData.password, req, res);
             });
         }
@@ -282,8 +291,6 @@ module.exports = function(app) {
         }
         else {
             resetPass(decoded.email, formData, (err, data) => {
-                console.log(err, data);
-
                 if (err) {
                     return res.status(400).json({ err: err });
                 }
@@ -304,12 +311,27 @@ module.exports = function(app) {
                 lastname: data.lastname,
                 username: data.username,
                 avatar: data.avatar,
-                verified: data.verified
+                verified: data.verified,
+                wishlist: data.wishlist,
+                dob: data.dob
             });
         });
     });
 
-    app.get('/api/users/:user', function(req, res) {
+    app.get('/api/users', withAuth, function(req, res) {
+        var decoded = decodeCookie(req);
+
+        Users.find({email:{$ne: decoded.email}}).select(["firstname", "lastname", "email", "avatar", "dob", "username", "wishlist"]).sort("firstname").exec((err, data) => {
+            if (data) {
+                return res.status(200).json({ members: data });
+            }
+            else {
+                return res.status(200).json({ members: [] });
+            }
+        });
+    });
+
+    app.get('/api/users/:user', withAuth, function(req, res) {
         var user = req.params.user;
 
         findByUsername(user, (err, data) => {
@@ -322,7 +344,9 @@ module.exports = function(app) {
                     lastname: data.lastname,
                     username: data.username,
                     avatar: data.avatar,
-                    verified: data.verified
+                    verified: data.verified,
+                    wishlist: data.wishlist,
+                    dob: data.dob
                 };
                 return res.status(200).json({ data: result });
             }
@@ -341,6 +365,68 @@ module.exports = function(app) {
             }
             else {
                 return res.status(200).json({  username: formData.username });
+            }
+        });
+    });
+
+
+    app.get('/api/wish', withAuth, function(req, res) {
+        var decoded = decodeCookie(req);
+        var email = decoded.email;
+
+        var formData = req.body;
+
+        findByEmail(email, (err, data) => {
+            if (err || !data) {
+                return res.status(400).json({ error: 1, msg: "Bad data, could not add wish!" });
+            }
+            else {
+                return res.status(200).json({  wishlist: data.wishlist });
+            }
+        });
+    });
+
+    app.get('/api/wish/:email', withAuth, function(req, res) {
+
+        var email = req.params.email;
+        findByEmail(email, (err, data) => {
+            if (err || !data) {
+                return res.status(400).json({ error: 1, msg: "Bad data, could not add wish!" });
+            }
+            else {
+                return res.status(200).json({  wishlist: data.wishlist });
+            }
+        });
+    });
+
+    app.post('/api/wish', withAuth, function(req, res) {
+        var decoded = decodeCookie(req);
+        var email = decoded.email;
+
+        var formData = req.body;
+
+        addWish(email, formData, (err, data) => {
+            if (err || !data) {
+                return res.status(400).json({ error: 1, msg: "Bad data, could not add wish!" });
+            }
+            else {
+                return res.status(200).json({  msg: "Success" });
+            }
+        });
+    });
+
+    app.delete('/api/wish/:id', withAuth, function(req, res) {
+        var decoded = decodeCookie(req);
+        var email = decoded.email;
+
+        var id = req.params.id
+
+        Users.updateOne({ email: email }, { $pull: {wishlist: {_id: id}} }, (err, data) => {
+            if (err || !data) {
+                return res.status(400).json({ error: 1, msg: "Bad data, could not add wish!" });
+            }
+            else {
+                return res.status(200).json({  msg: "Success" });
             }
         });
     });

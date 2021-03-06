@@ -1,5 +1,6 @@
 require('dotenv').config()
 var mongoose = require('mongoose');
+var Wishlist = require("./Wishlist");
 
 let db = mongoose.connection;
 db.once('open', () => console.log('connected to the database'));
@@ -56,6 +57,39 @@ var userSchema = new Schema({
     admin: {
         type: Boolean,
         default: false
+    },
+    wishlist: {
+        type:[
+            new Schema({
+                title: {
+                    type: String,
+                    required:true,
+                    unique:false
+                },
+                url: {
+                    type: String,
+                    required: true,
+                    unique: false
+                },
+                maxCost : {
+                    type: Number,
+                    required: true,
+                    unique: false
+                },
+                tags: {
+                    type: [String],
+                    required: false,
+                    default: []
+                },
+                complete: {
+                    type: Boolean,
+                    required: false,
+                    default: false
+                }
+            })
+        ],
+        required:false,
+        default: []
     }
 },
 { timestamps: true });

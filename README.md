@@ -19,8 +19,8 @@
 
 ```
 .
-├── .github
-├── services/
+├── ./.github
+├── ./
 ├── ├── __mocks__/ (any file type to mock)
 │   ├── apis/
 │   │   └── <all server apis>
@@ -44,20 +44,20 @@
 │   ├── server-utils.js
 │   ├── server.js
 │   └── webpack.config.js
-├── .gitignore
-├── Code_OF_CONDUCT.md
-├── LICENSE.md
-└── README.md
+├── ./.gitignore
+├── ./Code_OF_CONDUCT.md
+├── ./LICENSE.md
+└── ./README.md
 ```
 
 ## MongoDB Setup 
 
 1. This project is created with MongoDb Cloud. Create your own project/cluster [here](https://www.mongodb.com/cloud) for testing purposes.
-2. Make acopy and rename `mystery-gifts/services/.env.template` to  `mystery-gifts/services/.env`
+2. Make acopy and rename `mystery-gifts/.env.template` to  `mystery-gifts/.env`
 3. Edit the all fields in `< ... >` with your mongo cluster information.
 
 ## .env Setup
-> Make acopy and rename `mystery-gifts/services/.env.template` to  `mystery-gifts/services/.env` and Edit the all fields in `< ... >`.
+> Make acopy and rename `mystery-gifts/.env.template` to  `mystery-gifts/.env` and Edit the all fields in `< ... >`.
 
 ```sh
 # MongoDB connection URL

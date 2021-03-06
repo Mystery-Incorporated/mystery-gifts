@@ -103,14 +103,14 @@ dist
 # TernJS port file
 .tern-port
 
-services/application/public/bundle.js
-
 applicationBak
 applicationBak\*
 
 .env
 
 # ASSETS
-services/application/public/*.png
-services/application/public/bundle.js
-services/application/public/bundle.js
+application/public/*.png
+application/public/bundle.js
+application/public/bundle.js*
+
+env_vars.yaml
