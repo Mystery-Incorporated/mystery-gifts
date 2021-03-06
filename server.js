@@ -24,12 +24,12 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded( {extended: true} ));
 
-app.use(helmet());
-// app.use(
-//     helmet({
-//       contentSecurityPolicy: false,
-//     })
-// );
+//app.use(helmet());
+app.use(
+    helmet({
+      contentSecurityPolicy: false,
+    })
+);
 
 mongoose.Promise = global.Promise;
 
