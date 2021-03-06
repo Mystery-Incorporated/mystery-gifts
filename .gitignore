@@ -114,3 +114,5 @@ application/public/bundle.js
 application/public/bundle.js*
 
 env_vars.yaml
+
+.vercel
