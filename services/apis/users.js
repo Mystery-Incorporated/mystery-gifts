@@ -229,7 +229,6 @@ module.exports = function(app) {
                             // tag doesn't exist we are good
                             createUser(formData, (err, data) => {
                                 if (err) {
-                                    console.log(err)
                                     var errType = err.name;
                                     if (errType === 'ValidationError') {
                                         // go through each error ( there will only be one but still)
@@ -322,7 +321,7 @@ module.exports = function(app) {
     app.get('/api/users', withAuth, function(req, res) {
         var decoded = decodeCookie(req);
 
-        Users.find({email:{$ne: decoded.email}}).select(["firstname", "lastname", "email", "avatar", "dob"]).sort("firstname").exec((err, data) => {
+        Users.find({email:{$ne: decoded.email}}).select(["firstname", "lastname", "email", "avatar", "dob", "username", "wishlist"]).sort("firstname").exec((err, data) => {
             if (data) {
                 return res.status(200).json({ members: data });
             }
@@ -389,8 +388,7 @@ module.exports = function(app) {
 
     app.get('/api/wish/:email', withAuth, function(req, res) {
 
-        var email = req.params.email
-
+        var email = req.params.email;
         findByEmail(email, (err, data) => {
             if (err || !data) {
                 return res.status(400).json({ error: 1, msg: "Bad data, could not add wish!" });
@@ -424,7 +422,6 @@ module.exports = function(app) {
         var id = req.params.id
 
         Users.updateOne({ email: email }, { $pull: {wishlist: {_id: id}} }, (err, data) => {
-            console.log(err, data)
             if (err || !data) {
                 return res.status(400).json({ error: 1, msg: "Bad data, could not add wish!" });
             }

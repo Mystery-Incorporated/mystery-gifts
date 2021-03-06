@@ -6,6 +6,8 @@ import { Box, Heading, Grommet } from 'grommet';
 
 import { Home, Login, Logout, Reset, Loading, Verify, Profile } from 'Pages';
 
+import { ToastContainer } from "react-toast";
+
 class App extends Component {
     _isMounted = false;
 
@@ -267,6 +269,12 @@ class App extends Component {
                     <Route exact path="/" component={() => 
                         content
                     }/>
+                    <Route exact path="/l/:id" component={() => 
+                        content
+                    }/>
+                    <Route exact path="/pl/:pid" component={() => 
+                        content
+                    }/>
                     <Route exact path="/login" component={() =>
                         <Login data={propsData}/>
                     }/>
@@ -288,6 +296,7 @@ class App extends Component {
 
                     
                 </Switch>
+                <ToastContainer delay={2000} />
             </BrowserRouter>
         );
     }

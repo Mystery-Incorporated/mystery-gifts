@@ -1,6 +1,5 @@
 require('dotenv').config()
 var mongoose = require('mongoose');
-var Wishlist = require("./Wishlist");
 
 let db = mongoose.connection;
 db.once('open', () => console.log('connected to the database'));
@@ -12,54 +11,22 @@ const Schema = mongoose.Schema;
 /**
  * User Schema
  */
-var userSchema = new Schema({
-    username: {
-        type: String,
+var wlSchema = new Schema({
+    users: {
+        type: [String],
         required: true,
-        unique: true,
-        minlength: 4,
-        validate: /^[a-z0-9_-]+$/i
+        default: []
     },
-    firstname: {
+    title: {
         type: String,
-        required: true,
-        unique: false
+        require: true
     },
-    lastname: {
+    id: {
         type: String,
-        required: true,
-        unique: false
-    },
-    avatar: {
-        type: String,
-        required: false,
-        unique: false,
-        default: ''
-    },
-    password: {
-        type: String,
-        required: true
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    dob: {
-        type: Date,
-        required: true,
-        unique: false
-    },
-    verified: {
-        type: Boolean,
-        default: false
-    },
-    admin: {
-        type: Boolean,
-        default: false
+        require: true
     },
     wishlist: {
-        type:[
+        type: [
             new Schema({
                 title: {
                     type: String,
@@ -95,4 +62,4 @@ var userSchema = new Schema({
 { timestamps: true });
 
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('Wishlist', wlSchema);

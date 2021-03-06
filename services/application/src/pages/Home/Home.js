@@ -17,8 +17,12 @@ class Home extends Component {
         super(props)
         this.state = {
             resent: false,
-            tag:''
+            tag:'',
+            id:null,
+            pid:null
         };
+
+        this.getListIds = this.getListIds.bind(this);
     }
 
     handleInputChange = (event) => {
@@ -36,10 +40,15 @@ class Home extends Component {
         this._isMounted = false;
     }
 
+    getListIds() {
+        this.setState({id: this.props.match.params.id, pid: this.props.match.params.pid});
+    }
+
     componentDidMount() {
         this._isMounted = true;
         this.setState(this.props.data);
-
+        console.log("PARAMS ", this.props.match.params);
+        this.getListIds()
 
         if (this._isMounted && !this.props.data.isLoggedIn) {
             this.props.history.push("/login");
@@ -86,6 +95,12 @@ class Home extends Component {
             }
         };
 
+        var data = this.props.data;
+        data.id = this.state.id;
+        data.pid = this.state.pid;
+        data.getListIds = this.getListIds;
+
+
         return (
             <Grommet theme={customTheme}>
 
@@ -99,9 +114,9 @@ class Home extends Component {
                         direction="column"
                         gap="small"
                     >
-                        <NavBar data={this.props.data}/>
+                        <NavBar data={data}/>
                         <Box fill background='none'>
-                            <Dashboard data={this.props.data}/>
+                            <Dashboard data={data}/>
                         </Box>
                     </Box>
 
