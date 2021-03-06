@@ -714,11 +714,15 @@ class Dashboard extends Component {
                                 plain
                                 value={this.state.loadWishlistId}
                                 onChange={event => {this.setState({loadWishlistId: event.target.value});}}
+                                onKeyPress={event => {
+                                    if (event.key === 'Enter') {
+                                        this.loadPrivateList(this.state.loadWishlistId);
+                                    }
+                                }}
                                 size="small"
                             />
                         </Box>
 
-                        
                         <Box
                             width={{"min":"80px"}}
                             height={{"min":"10px"}}
@@ -924,8 +928,9 @@ class Dashboard extends Component {
                                                     el.setSelectionRange(0, 99999);;
                                                     document.execCommand('copy');
                                                 }}
+                                                round="2px"
                                             >
-                                                <Text size="12px">Copy link</Text>
+                                                <Text size="12px" color="#eee">Copy link</Text>
                                             </Box>
 
                                             {responsive === "large" &&
