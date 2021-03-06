@@ -181,6 +181,7 @@ class Dashboard extends Component {
         .then(data => {
             console.log("MEMBERS DATA ", data)
             if ('error' in data) {
+                toast.error('Error loading members list.');
                 this.setState({error: data.msg});
             }
             else {
@@ -201,8 +202,8 @@ class Dashboard extends Component {
             }
         }) 
         .catch(err => {
-            console.log('Error logging in please try again', err);
-            alert('Error logging in please try again');
+            console.log('Error loading members list, ', err);
+            toast.error('Error loading members list.');
         });
 
     }
@@ -279,6 +280,7 @@ class Dashboard extends Component {
             console.log("MEMBERS DATA ", data)
             if ('error' in data) {
                 this.setState({error: data.msg});
+                toast.error('Error selecting memeber please try again.');
             }
             else {
                 this.setState({wishlist:data.wishlist})
@@ -286,7 +288,7 @@ class Dashboard extends Component {
         }) 
         .catch(err => {
             console.log('Error selecting member', err);
-            alert('Error selecting memeber please try again');
+            toast.error('Error selecting memeber please try again.');
         });
     }
 
@@ -366,8 +368,8 @@ class Dashboard extends Component {
             toast.success("Successfully deleted from your list.");
         }) 
         .catch(err => {
-            console.log("Error adding wish, ", err);
-            alert('Error adding wish to list');
+            console.log("Error deleting wish, ", err);
+            toast.error('Error deleting wish.');
         });
     }
 
@@ -387,8 +389,8 @@ class Dashboard extends Component {
             toast.success("Successfully deleted from this private list.");
         }) 
         .catch(err => {
-            console.log("Error adding wish, ", err);
-            alert('Error adding wish to list');
+            console.log("Error deleting from private list, ", err);
+            toast.error('Error deleting from private list.');
         });
     }
 
@@ -410,8 +412,8 @@ class Dashboard extends Component {
             this.props.data.reloadWishlist();
         }) 
         .catch(err => {
-            console.log("Error adding wish, ", err);
-            alert('Error adding wish to list');
+            console.log("Error adding to list, ", err);
+            toast.error('Error adding to list.');
         });
     }
 
@@ -435,12 +437,13 @@ class Dashboard extends Component {
             this.props.data.reloadWishlist();
         }) 
         .catch(err => {
-            console.log("Error adding wish, ", err);
-            alert('Error adding wish to list');
+            console.log("Error adding to private list., ", err);
+            toast.error('Error adding to private list.');
         });
     }
 
     loadPrivateList(id) {
+        this.setState({loadingWishlist:true});
         fetch('/api/list/' + id, {
             method: 'GET',
             headers: {
@@ -459,6 +462,7 @@ class Dashboard extends Component {
                 
                 this.setState({loadingWishlist: false, wishlist: this._loadWishList(this.props.data.username).wishlist});
                 this.props.history.push("/l/" + this.props.data.username);
+                toast.error("Invalid private list.");
             }
             else {
                 var mockMember = {
@@ -477,8 +481,9 @@ class Dashboard extends Component {
 
         }) 
         .catch(err => {
-            console.log("Error adding wish, ", err);
-            alert('Error adding wish to list');
+            this.setState({loadingWishlist: false, wishlist: this._loadWishList(this.props.data.username).wishlist});
+            this.props.history.push("/l/" + this.props.data.username);
+            toast.error('Error loading private list.');
         });
     }
 
@@ -508,8 +513,8 @@ class Dashboard extends Component {
             toast.success("Successfully created private list.");
         }) 
         .catch(err => {
-            console.log("Error adding wish, ", err);
-            alert('Error adding wish to list');
+            console.log("Error creating wish, ", err);
+            toast.error('Error creating wish.');
         });
     }
 
@@ -717,7 +722,7 @@ class Dashboard extends Component {
                         <Box
                             width={{"min":"80px"}}
                             height={{"min":"10px"}}
-                            onClick={() => {this.setState({loadingWishlist:true}); this.loadPrivateList(this.state.loadWishlistId)}}
+                            onClick={() => {this.loadPrivateList(this.state.loadWishlistId)}}
                             pad={{
                                 "left":"small",
                                 "right":"small",
