@@ -51,7 +51,7 @@ class Login extends Component {
             });
         }
         else {
-            for ( var property in value ) {
+            for ( let property in value ) {
                 this.setState({[property]: value[property]});
             }
         }
@@ -126,7 +126,7 @@ class Login extends Component {
     }
 
     render() {
-        var value = this.state;
+        let value = this.state;
 
         const emailMask = [
             {
@@ -148,7 +148,7 @@ class Login extends Component {
         const onOpen = () => this.setInvalid(true);
         const onClose = () => this.setInvalid(undefined);
 
-        var form = 
+        let form = 
             <Box 
                 direction="column"
                 pad="none"

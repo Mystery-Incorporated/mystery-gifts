@@ -4,8 +4,8 @@ require('dotenv').config({path:__dirname+'/./../../.env'});
 console.log(process.env);
 
 function newUser(email, playerTag, password) {
-    var salt = bcrypt.genSaltSync(15);
-    var pass = bcrypt.hashSync(password, salt);
+    let salt = bcrypt.genSaltSync(15);
+    let pass = bcrypt.hashSync(password, salt);
     return {
         email: email,
         playerTag: playerTag,

@@ -56,7 +56,7 @@ class Reset extends Component {
             });
         }
         else {
-            for ( var property in value ) {
+            for ( let property in value ) {
                 this.setState({[property]: value[property]});
             }
         }
@@ -87,8 +87,8 @@ class Reset extends Component {
         }
         else {
             this.setState({message: null});
-            var ncount = 0;
-            for (var prop in this.state) {
+            let ncount = 0;
+            for (let prop in this.state) {
                 if (this.state[prop] == null) {
                     ncount++;
                 }
@@ -150,7 +150,7 @@ class Reset extends Component {
     }
 
     render() {
-        var value = this.state;
+        let value = this.state;
         const emailMask = [
             {
                 regexp: /^[\w\-_.]+$/,
@@ -173,7 +173,7 @@ class Reset extends Component {
 
         
 
-        var regFormCont = 
+        let regFormCont = 
             <Box 
                 direction="column"
                 pad="none"

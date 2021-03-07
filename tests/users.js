@@ -6,12 +6,12 @@ let chaiHttp = require('chai-http');
 let should = chai.should();
 let app = require('../server');
 
-var mongoose = require('mongoose');
+let mongoose = require('mongoose');
 const dbHandler = require('./controllers/db-handler.js');
 
 //Importing our todo model for our unit testing.
-var User = require('../models/User.js');
-var userData = require('./data/UsersData.js');
+let User = require('../models/User.js');
+let userData = require('./data/UsersData.js');
 
 chai.use(chaiHttp);
 

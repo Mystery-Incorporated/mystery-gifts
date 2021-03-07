@@ -95,7 +95,7 @@ class Home extends Component {
             }
         };
 
-        var data = this.props.data;
+        let data = this.props.data;
         data.id = this.state.id;
         data.pid = this.state.pid;
         data.getListIds = this.getListIds;

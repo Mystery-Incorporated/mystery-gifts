@@ -1,6 +1,6 @@
 require('dotenv').config()
-var mongoose = require('mongoose');
-var Wishlist = require("./Wishlist");
+let mongoose = require('mongoose');
+let Wishlist = require("./Wishlist");
 
 let db = mongoose.connection;
 db.once('open', () => console.log('connected to the database'));
@@ -12,7 +12,7 @@ const Schema = mongoose.Schema;
 /**
  * User Schema
  */
-var userSchema = new Schema({
+let userSchema = new Schema({
     username: {
         type: String,
         required: true,

@@ -1,13 +1,13 @@
 require('dotenv').config()
 
-var Users = require("../models/User");
+let Users = require("../models/User");
 const withAuth = require('./middleware');
 const bcrypt = require('bcryptjs');
 const Cryptr = require('cryptr');
 const cryptr = new Cryptr(process.env.SECRET);
 const jwt = require('jsonwebtoken');
 const nodemailer = require("nodemailer");
-var cookie = require('cookie');
+let cookie = require('cookie');
 
 function encode(email) {
     if (!email) return "";
@@ -20,7 +20,7 @@ function decode(email) {
 }
 
 function createSession(req, res, data) {
-    var payload = {
+    let payload = {
         // hashedID: encode(identifier),
         hashedID: encode(data.username),
         emailHash: encode(data.email),
@@ -52,7 +52,7 @@ function killSession(req, res) {
 
 function login(err, data, password, req, res) {
     if (!err && data) {
-        var user = {
+        let user = {
             username: data.username,
             email: data.email,
             // playerNickName: data.playerNickName,
@@ -100,15 +100,15 @@ function verifyEmail(email, callback) {
 }
 
 function generateVerificationToken(email) {
-    var date = new Date();
-    var toEncode = "verification/"+email+"/"+date;
+    let date = new Date();
+    let toEncode = "verification/"+email+"/"+date;
     return Buffer(toEncode, 'ascii').toString('base64');
 }
 
 function verificationTokenValid(email, token) {
     if (!token) return false;
 
-    var data = Buffer(token, 'base64').toString('ascii').split("/");
+    let data = Buffer(token, 'base64').toString('ascii').split("/");
     if (data.length != 3) {
         return false;
     }
@@ -118,7 +118,7 @@ function verificationTokenValid(email, token) {
 }
 
 function sendEmail(email, token, req, res) {
-    var transporter = nodemailer.createTransport({ 
+    let transporter = nodemailer.createTransport({ 
         service: 'gmail', 
         auth: { 
             user: process.env.MAIL_USER, 
@@ -126,7 +126,7 @@ function sendEmail(email, token, req, res) {
         } 
     });
 
-    var mailOptions = { 
+    let mailOptions = { 
         from: 'no-reply@shgang.com', 
         to: email, 
         subject: 'Account Verification Token', 
@@ -139,9 +139,9 @@ function sendEmail(email, token, req, res) {
 }
 
 function createUser(data, callback) {
-    var salt = bcrypt.genSaltSync(15);
-    var pass = bcrypt.hashSync(data.password, salt);
-    var user = {
+    let salt = bcrypt.genSaltSync(15);
+    let pass = bcrypt.hashSync(data.password, salt);
+    let user = {
         email: data.email,
         username: data.username,
         firstname: data.firstname,
@@ -156,8 +156,8 @@ function createUser(data, callback) {
 
 function updateUserInfo(email, data, callback) {
     if (data.password){
-        var salt = bcrypt.genSaltSync(15);
-        var pass = bcrypt.hashSync(data.password, salt);
+        let salt = bcrypt.genSaltSync(15);
+        let pass = bcrypt.hashSync(data.password, salt);
         data.password = pass;
     }
 
@@ -169,7 +169,7 @@ function resetPass(email, formData, callback) {
         if (data) {
             if (verifyPass(data, formData.currentpassword)) {
 
-                var user = {
+                let user = {
                     email: data.email,
                     username: data.username,
                     firstname: data.firstname,
@@ -194,9 +194,9 @@ function resetPass(email, formData, callback) {
 }
 
 function decodeCookie(req) {
-    var cookies = cookie.parse(req.headers.cookie);
-    var token = cookies.token;
-    var decoded = jwt.verify(token, process.env.SECRET);
+    let cookies = cookie.parse(req.headers.cookie);
+    let token = cookies.token;
+    let decoded = jwt.verify(token, process.env.SECRET);
 
     return {email: decode(decoded.emailHash), id: decode(decoded.hashedID)};
 }
@@ -216,7 +216,7 @@ module.exports = function(app) {
 
     ///// DISABLED
     app.post('/api/signup', withAuth, (req, res) => {
-        var formData = req.body;
+        let formData = req.body;
         if (!formData.email || !formData.username || !formData.password || !formData.firstname || !formData.lastname || !formData.dob) {
             return res.status(400).json({ error: 1, msg: "Missing fields." });
         }
@@ -229,12 +229,12 @@ module.exports = function(app) {
                             // tag doesn't exist we are good
                             createUser(formData, (err, data) => {
                                 if (err) {
-                                    var errType = err.name;
+                                    let errType = err.name;
                                     if (errType === 'ValidationError') {
                                         // go through each error ( there will only be one but still)
-                                        var msg = ""
-                                        var validationErrors = err.errors;
-                                        for (var error in validationErrors) {
+                                        let msg = ""
+                                        let validationErrors = err.errors;
+                                        for (let error in validationErrors) {
                                             if (validationErrors[error].kind === 'minlength') {
                                                 msg += 'Username needs to be atleast 4 characters long. '
                                             } else {
@@ -280,10 +280,10 @@ module.exports = function(app) {
                 return login(err, data, formData.password, req, res);
             });
         }
-    });
+    });    
 
     app.post('/api/reset', withAuth, (req, res) => {
-        var decoded = decodeCookie(req);
+        let decoded = decodeCookie(req);
 
         const formData = req.body;
         if (!formData.currentpassword || !formData.password || !formData.password2) {
@@ -302,7 +302,7 @@ module.exports = function(app) {
     });
 
     app.get('/api/checkToken', withAuth, function(req, res) {
-        var decoded = decodeCookie(req);
+        let decoded = decodeCookie(req);
 
         findByEmail(decoded.email, function(err, data) {
 
@@ -319,7 +319,7 @@ module.exports = function(app) {
     });
 
     app.get('/api/users', withAuth, function(req, res) {
-        var decoded = decodeCookie(req);
+        let decoded = decodeCookie(req);
 
         Users.find({email:{$ne: decoded.email}}).select(["firstname", "lastname", "email", "avatar", "dob", "username", "wishlist"]).sort("firstname").exec((err, data) => {
             if (data) {
@@ -332,14 +332,14 @@ module.exports = function(app) {
     });
 
     app.get('/api/users/:user', withAuth, function(req, res) {
-        var user = req.params.user;
+        let user = req.params.user;
 
         findByUsername(user, (err, data) => {
             if (err || !data) {
                 return res.status(404).json({ error: 1, msg: "Could not find user!" });
             }
             else {
-                var result = {
+                let result = {
                     firstname: data.firstname,
                     lastname: data.lastname,
                     username: data.username,
@@ -354,10 +354,10 @@ module.exports = function(app) {
     });
 
     app.post('/api/users/update', withAuth, function(req, res) {
-        var decoded = decodeCookie(req);
-        var email = decoded.email;
+        let decoded = decodeCookie(req);
+        let email = decoded.email;
 
-        var formData = req.body;
+        let formData = req.body;
 
         updateUserInfo(email, formData, (err, data) => {
             if (err || !data) {
@@ -371,10 +371,10 @@ module.exports = function(app) {
 
 
     app.get('/api/wish', withAuth, function(req, res) {
-        var decoded = decodeCookie(req);
-        var email = decoded.email;
+        let decoded = decodeCookie(req);
+        let email = decoded.email;
 
-        var formData = req.body;
+        let formData = req.body;
 
         findByEmail(email, (err, data) => {
             if (err || !data) {
@@ -388,7 +388,7 @@ module.exports = function(app) {
 
     app.get('/api/wish/:email', withAuth, function(req, res) {
 
-        var email = req.params.email;
+        let email = req.params.email;
         findByEmail(email, (err, data) => {
             if (err || !data) {
                 return res.status(400).json({ error: 1, msg: "Bad data, could not add wish!" });
@@ -400,10 +400,10 @@ module.exports = function(app) {
     });
 
     app.post('/api/wish', withAuth, function(req, res) {
-        var decoded = decodeCookie(req);
-        var email = decoded.email;
+        let decoded = decodeCookie(req);
+        let email = decoded.email;
 
-        var formData = req.body;
+        let formData = req.body;
 
         addWish(email, formData, (err, data) => {
             if (err || !data) {
@@ -416,10 +416,10 @@ module.exports = function(app) {
     });
 
     app.delete('/api/wish/:id', withAuth, function(req, res) {
-        var decoded = decodeCookie(req);
-        var email = decoded.email;
+        let decoded = decodeCookie(req);
+        let email = decoded.email;
 
-        var id = req.params.id
+        let id = req.params.id
 
         Users.updateOne({ email: email }, { $pull: {wishlist: {_id: id}} }, (err, data) => {
             if (err || !data) {
@@ -432,8 +432,8 @@ module.exports = function(app) {
     });
 
     // app.post('/api/sendVerification', (req, res) => {
-    //     var decoded = decodeCookie(req);
-    //     var email = decoded.email;
+    //     let decoded = decodeCookie(req);
+    //     let email = decoded.email;
 
     //     sendEmail(email, generateVerificationToken(email), req, res);
 
@@ -444,7 +444,7 @@ module.exports = function(app) {
 
         if (!req.params.token) return res.status(400).json({ error: 1, msg: "Token expired or Invalid token!" });
 
-        var data = Buffer(req.params.token, 'base64').toString('ascii').split("/");
+        let data = Buffer(req.params.token, 'base64').toString('ascii').split("/");
 
         if (verificationTokenValid(data[1], req.params.token)) {
             verifyEmail(data[1], (err, data) => {

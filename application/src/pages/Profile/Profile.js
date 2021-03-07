@@ -72,7 +72,7 @@ class Profile extends Component {
             });
         }
         else {
-            for ( var property in value ) {
+            for ( let property in value ) {
                 this.setState({[property]: value[property]});
             }
         }
@@ -152,7 +152,7 @@ class Profile extends Component {
 
         if (this._isMounted) {
             const values = queryString.parse(this.props.location.search)
-            var user = values.user ;
+            let user = values.user ;
 
             if (!user) {
                 user = this.props.data.username;
@@ -195,7 +195,7 @@ class Profile extends Component {
     
 
     render() {
-        var value = this.state;
+        let value = this.state;
         
         const onOpen = () => this.setInvalid(true);
         const onClose = () => this.setInvalid(undefined);
