@@ -321,7 +321,7 @@ module.exports = function(app) {
     app.get('/api/users', withAuth, function(req, res) {
         let decoded = decodeCookie(req);
 
-        Users.find({email:{$ne: decoded.email}}).select(["firstname", "lastname", "email", "avatar", "dob", "username", "wishlist"]).sort("firstname").exec((err, data) => {
+        Users.find({$query: {email:{$ne: decoded.email}}, $orderby: { firstname : 1 }}).select(["firstname", "lastname", "email", "avatar", "dob", "username", "wishlist"]).exec((err, data) => {
             if (data) {
                 return res.status(200).json({ members: data });
             }
