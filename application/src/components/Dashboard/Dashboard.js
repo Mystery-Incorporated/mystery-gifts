@@ -185,7 +185,7 @@ class Dashboard extends Component {
                 this.setState({error: data.msg});
             }
             else {
-                var myData = {
+                let myData = {
                     firstname: this.props.data.firstname,
                     lastname: this.props.data.lastname,
                     dob: this.props.data.dob,
@@ -215,7 +215,7 @@ class Dashboard extends Component {
         }
         else if (this.props.data.id) {
 
-            var member = this._loadWishList(this.props.data.id);
+            let member = this._loadWishList(this.props.data.id);
 
             console.log("FINDING OBJ ", member, this.state.members, this.props.data.id)
             if (member) {
@@ -298,7 +298,7 @@ class Dashboard extends Component {
         const inputValue = value.trim().toLowerCase();
         const inputLength = inputValue.length;
 
-        var filtered = inputLength === 0 ? [] : this.state.members.filter(member =>
+        let filtered = inputLength === 0 ? [] : this.state.members.filter(member =>
             member.firstname.toLowerCase().slice(0, inputLength) === inputValue || 
             member.lastname.toLowerCase().slice(0, inputLength) === inputValue 
         );
@@ -323,11 +323,11 @@ class Dashboard extends Component {
             this.setState({error:"Fill out all fields."})
         }
 
-        var maxCost = parseFloat(this.state.itemMaxCost);
-        var tags = this.state.itemCategories.map(function(item) {
+        let maxCost = parseFloat(this.state.itemMaxCost);
+        let tags = this.state.itemCategories.map(function(item) {
             return item['text'];
         });
-        var wish = {
+        let wish = {
             title: this.state.itemTitle,
             url: this.state.itemURL,
             maxCost: maxCost,
@@ -465,7 +465,7 @@ class Dashboard extends Component {
                 toast.error("Invalid private list.");
             }
             else {
-                var mockMember = {
+                let mockMember = {
                     firstname: data.title,
                     lastname: data.title,
                     dob: '1996-12-25',
@@ -490,7 +490,7 @@ class Dashboard extends Component {
     createWishlist() {
         this.setState({creatingList: true});
 
-        var lst = {
+        let lst = {
             title: this.state.wishlistTitle,
             id: this.state.wishlistId,
         }
@@ -520,7 +520,7 @@ class Dashboard extends Component {
 
     render() {    
         
-        var searchbar = 
+        let searchbar = 
         <Box
             width="98%"
             border={{ color: "#ddd", side: 'bottom' }}
@@ -581,7 +581,7 @@ class Dashboard extends Component {
             }
         </Box>;
 
-        var sidebar = 
+        let sidebar = 
         <Box
             width={{"min":"384px"}}
             height="100%"
@@ -673,7 +673,7 @@ class Dashboard extends Component {
             }
         </Box>;
 
-        var content = (responsive) => {
+        let content = (responsive) => {
         return (
             <Box
                 direction="column"
@@ -977,7 +977,7 @@ class Dashboard extends Component {
             </Box>
         )};
 
-        var addWishlistItemForm = (
+        let addWishlistItemForm = (
             <Box width="100%" height="100%" background="none" align="start" justify="center" pad="none" direction="column">
                 <Box
                     width="800px"
@@ -1100,7 +1100,7 @@ class Dashboard extends Component {
             </Box>
         );
 
-        var createWishlistForm = (
+        let createWishlistForm = (
             <Box width="100%" height="100%" background="none" align="start" justify="center" pad="none" direction="column">
                 <Box
                     width="800px"

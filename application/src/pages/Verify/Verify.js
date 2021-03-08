@@ -41,7 +41,7 @@ class Verify extends Component {
         this._isMounted = true;
         if (this._isMounted) {
             const values = queryString.parse(this.props.location.search)
-            var token = values.token;
+            let token = values.token;
 
             if (!token || token === '') {
                 this.setState({msg:"Invalid Token!"});

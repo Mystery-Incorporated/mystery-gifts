@@ -2,15 +2,15 @@ require('dotenv').config();
 
 // server
 const path = require('path');
-var express = require('express');
-var app = express();
-var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
-var socket = require('socket.io');
+let express = require('express');
+let app = express();
+let bodyParser = require('body-parser');
+let mongoose = require('mongoose');
+let socket = require('socket.io');
 const cookieParser = require('cookie-parser');
-var shortid = require('shortid');
-var morgan = require('morgan');
-var helmet = require('helmet');
+let shortid = require('shortid');
+let morgan = require('morgan');
+let helmet = require('helmet');
 
 
 // bundler
@@ -24,18 +24,18 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded( {extended: true} ));
 
-app.use(helmet());
-// app.use(
-//     helmet({
-//       contentSecurityPolicy: false,
-//     })
-// );
+//app.use(helmet());
+app.use(
+    helmet({
+      contentSecurityPolicy: false,
+    })
+);
 
 mongoose.Promise = global.Promise;
 
 // The main instance of HTTP server
-var server = require('http').Server(app);
-var io = socket(server);
+let server = require('http').Server(app);
+let io = socket(server);
 
 app.use(express.static(path.join(__dirname, '/application/public')));
 
@@ -52,11 +52,12 @@ if (process.env.NODE_ENV !== 'test') {
     });
 }
 
-var hostname = 'localhost';
-var port = 8080;
+let hostname = 'localhost';
+let port = 8080;
 
 // APIs go here
 const user = require('./apis/users.js')(app);
+const admin = require('./apis/admin.js')(app);
 const wishlist = require('./apis/wishlist.js')(app);
 const withAuth = require('./apis/middleware');
 const UserAPI = require('./models/User.js')

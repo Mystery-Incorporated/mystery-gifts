@@ -8,6 +8,12 @@ import { Home, Login, Logout, Reset, Loading, Verify, Profile } from 'Pages';
 
 import { ToastContainer } from "react-toast";
 
+
+const MONTHS = ["January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
+
 class App extends Component {
     _isMounted = false;
 
@@ -151,33 +157,35 @@ class App extends Component {
 
     formatDOB(dob) {
         if (dob) {
-            var date = Date.parse(dob);
-            var options = { month: 'long', day: 'numeric' };
-            return new Intl.DateTimeFormat('en-US', options).format(date);
+            let date = new Date(Date.parse(dob));
+            let month = date.getUTCMonth();
+            let day = date.getUTCDate();
+
+            return MONTHS[month] + " " + day;
         }
     }
 
     formatDate(date) {
         if (date) {
-            var date = Date.parse(date);
-            var options = { };
+            let date = Date.parse(date);
+            let options = { };
             return new Intl.DateTimeFormat('en-US', options).format(date);
         }
     }
 
     formatDateTime(date) {
         if (date) {
-            var date = Date.parse(date);
-            var options = { dateStyle: 'medium', timeStyle: 'short' };
+            let date = Date.parse(date);
+            let options = { dateStyle: 'medium', timeStyle: 'short' };
             return new Intl.DateTimeFormat('en-US', options).format(date);
         }
     }
 
     formatHumanDate(d) {
         if (d) {
-            var date = Date.parse(d);
-            var options = { month: 'long', day: 'numeric' };
-            var dateSplit =  new Intl.DateTimeFormat('en-US', options).format(date).split(" ");
+            let date = Date.parse(d);
+            let options = { month: 'long', day: 'numeric' };
+            let dateSplit =  new Intl.DateTimeFormat('en-US', options).format(date).split(" ");
 
             return dateSplit[1] + this.nth(dateSplit[1]) + " of " + dateSplit[0];
         }
@@ -187,9 +195,9 @@ class App extends Component {
         return this.getNameAlt(this.state.firstname);
     }
 
-    getNameAlt(name) {
-        var name = name.toLowerCase().split(' ');
-        for (var i = 0; i < name.length; i++) {
+    getNameAlt(nameArg) {
+        let name = nameArg.toLowerCase().split(' ');
+        for (let i = 0; i < name.length; i++) {
 
             name[i] = name[i].charAt(0).toUpperCase() + name[i].substring(1);     
         }
@@ -204,8 +212,8 @@ class App extends Component {
     getRemainingDays(dob) {
 
         if (dob) {
-            var birthday = new Date(dob);
-            var today = new Date();
+            let birthday = new Date(dob);
+            let today = new Date();
 
                 birthday.setFullYear(today.getFullYear());
             if (today > birthday) {
@@ -232,7 +240,7 @@ class App extends Component {
 
     render() {
         console.log("APP STATE", this.state);
-        var propsData = {
+        let propsData = {
             login: this.login,
             logout:this.logout,
             logout:this.logout,
@@ -261,7 +269,7 @@ class App extends Component {
             color4: '#aaa'
         };
 
-        var content = this.state.loading ? <Loading /> :
+        let content = this.state.loading ? <Loading /> :
             <Home data={propsData}/>
         return (
           <BrowserRouter>
