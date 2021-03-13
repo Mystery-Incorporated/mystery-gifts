@@ -218,19 +218,19 @@ class Dashboard extends Component {
 
             let member = this._loadWishList(this.props.data.id);
 
-            if (member) {
+            if (member.username) {
                 this.setState({loadingWishlist: false, myWishList:member.username === this.props.data.username, currentMember: member, wishlist: member.wishlist});
 
             }
             else {
                 this.props.history.push("/l/" + this.props.data.username);
-                this.setState({loadingWishlist: false, wishlist: this._loadWishList(this.props.data.username).wishlist});
+                this.setState({loadingWishlist: false, myWishList:true, wishlist: this._loadWishList(this.props.data.username).wishlist});
 
             }
         }
         else {
             this.props.history.push("/l/" + this.props.data.username);
-            this.setState({loadingWishlist: false, wishlist: this._loadWishList(this.props.data.username).wishlist});
+            this.setState({loadingWishlist: false, myWishList:true, wishlist: this._loadWishList(this.props.data.username).wishlist});
 
 
         }
