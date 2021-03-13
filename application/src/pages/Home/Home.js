@@ -47,7 +47,6 @@ class Home extends Component {
     componentDidMount() {
         this._isMounted = true;
         this.setState(this.props.data);
-        console.log("PARAMS ", this.props.match.params);
         this.getListIds()
 
         if (this._isMounted && !this.props.data.isLoggedIn) {

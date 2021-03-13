@@ -30,6 +30,8 @@ import { WithContext as ReactTags } from 'react-tag-input';
 
 import { toast } from "react-toast";
 
+import isUrl from 'is-url'
+
 const KeyCodes = {
   comma: 188,
   enter: 13,
@@ -112,7 +114,7 @@ class Dashboard extends Component {
             itemTitle: "",
             itemURL: "",
             itemCategories: [],
-            itemMaxCost: 0,
+            itemMaxCost: "0",
             myWishList: true,
             currentMember: null,
             loadWishlistId:"",
@@ -179,7 +181,6 @@ class Dashboard extends Component {
             return res.json();
         })
         .then(data => {
-            console.log("MEMBERS DATA ", data)
             if ('error' in data) {
                 toast.error('Error loading members list.');
                 this.setState({error: data.msg});
@@ -217,7 +218,6 @@ class Dashboard extends Component {
 
             let member = this._loadWishList(this.props.data.id);
 
-            console.log("FINDING OBJ ", member, this.state.members, this.props.data.id)
             if (member) {
                 this.setState({loadingWishlist: false, myWishList:member.username === this.props.data.username, currentMember: member, wishlist: member.wishlist});
 
@@ -238,7 +238,6 @@ class Dashboard extends Component {
 
     _loadWishList(id) {
         let obj = this.state.members.find(mem => mem.username === id);
-        console.log("FINDING OBJ2 ", obj, this.state.members, id)
         if (obj) {
             return obj;
         }
@@ -262,7 +261,6 @@ class Dashboard extends Component {
     }    
 
     selectMember(member) {
-        console.log("MEMBER: ", member);
         this.props.history.push("/l/" + member.username);
         this.setState({selectingMember: true, currentMember: member, loadingWishlist: true, privateListLoaded:false});
         fetch('/api/wish/' + member.email, {
@@ -277,7 +275,6 @@ class Dashboard extends Component {
             return res.json();
         })
         .then(data => {
-            console.log("MEMBERS DATA ", data)
             if ('error' in data) {
                 this.setState({error: data.msg});
                 toast.error('Error selecting memeber please try again.');
@@ -313,33 +310,37 @@ class Dashboard extends Component {
     }
 
     submitWish() {
-        console.log("WISH", this.state);
 
         if (!this.isNumeric(this.state.itemMaxCost)) {
             this.setState({error:"Max Cost must be a valid price."})
         }
-
-        if (this.state.itemTitle === "" || this.state.itemURL === "" || this.state.itemMaxCost === "") {
+        else if (this.state.itemTitle === "" || this.state.itemURL === "" || this.state.itemMaxCost === "") {
             this.setState({error:"Fill out all fields."})
         }
-
-        let maxCost = parseFloat(this.state.itemMaxCost);
-        let tags = this.state.itemCategories.map(function(item) {
-            return item['text'];
-        });
-        let wish = {
-            title: this.state.itemTitle,
-            url: this.state.itemURL,
-            maxCost: maxCost,
-            tags: tags
-        };
-
-        
-        if (this.state.privateListLoaded) {
-            this.addToPrivateList(wish);
-        }
         else {
-            this.addToMyList(wish);
+
+            let maxCost = parseFloat(this.state.itemMaxCost);
+            let tags = this.state.itemCategories.map(function(item) {
+                return item['text'];
+            });
+            let url = this.state.itemURL;
+            if (!isUrl(url)) {
+                url = "#"
+            }
+            let wish = {
+                title: this.state.itemTitle,
+                url: url,
+                maxCost: maxCost,
+                tags: tags
+            };
+
+            
+            if (this.state.privateListLoaded) {
+                this.addToPrivateList(wish);
+            }
+            else {
+                this.addToMyList(wish);
+            }
         }
     }
 
@@ -418,7 +419,6 @@ class Dashboard extends Component {
     }
 
     addToPrivateList(wish) {
-        console.log("ADDING TO PRIVATE LIST ", wish)
         wish.id = this.state.currentMember.username;
         fetch('/api/list/wish', {
             method: 'POST',
@@ -456,8 +456,6 @@ class Dashboard extends Component {
         })
         .then(data => {
             
-            console.log("PRIVATE LIST ", data)
-
             if ('error' in data) {
                 
                 this.setState({loadingWishlist: false, wishlist: this._loadWishList(this.props.data.username).wishlist});
@@ -495,7 +493,6 @@ class Dashboard extends Component {
             id: this.state.wishlistId,
         }
 
-        console.log("CREATE WISH LIST ", this.state.wishlistTitle, this.state.wishlistId);
         fetch('/api/list', {
             method: 'POST',
             body: JSON.stringify(lst),
@@ -521,10 +518,12 @@ class Dashboard extends Component {
     render() {    
         
         let searchbar = 
-        <Box
-            width="98%"
-            border={{ color: "#ddd", side: 'bottom' }}
-
+        <div
+            style={{
+                width:"100%",
+                borderBottom: "1px solid #ddd",
+                height:"auto"
+            }}
         >
             <TextInput
                 icon={<Search color={this.props.data.color4} size="20px"/>}
@@ -539,7 +538,7 @@ class Dashboard extends Component {
             {this.state.showSuggestions &&
                 <Box
                     width="100%"
-                    height={{"max":"400px"}}
+                    height={{"min":"75px", "max":"400px"}}
                     pad={{
                         "top":"small",
                         "bottom":"small",
@@ -560,7 +559,6 @@ class Dashboard extends Component {
                                 onClick={() => {
                                     if (member.myData) this.setState({myWishList:true});
                                     else this.setState({myWishList:false});
-                                    console.log("HMM MEMBER ", member)
                                     this.selectMember(member);
                                 }}
                                 key={member.lastname+member.dob+"-search"}
@@ -579,7 +577,7 @@ class Dashboard extends Component {
                     })}
                 </Box>
             }
-        </Box>;
+        </div>;
 
         let sidebar = 
         <Box
@@ -680,7 +678,7 @@ class Dashboard extends Component {
                 justify="start"
                 flex={{"grow":1, "shrink":1}}
                 pad={{"bottom":"10px"}}
-
+                overflow={{"vertical":"auto"}}
             >
                 {/** Content starts here */}
                 {/** 3 columns of content */}
@@ -815,6 +813,7 @@ class Dashboard extends Component {
                         height="100%"
                         pad={{"left":"5px"}}
                         margin={{"top":"10px", "bottom":"10px"}}
+                        overflow={{"vertical":"auto"}}
                     >
                         {(!this.state.loadingWishlist && (!this.state.wishlist || this.state.wishlist.length == 0)) && 
                             <Text color={this.props.data.color4} size="xlarge" >There is nothing in this wish list.</Text>

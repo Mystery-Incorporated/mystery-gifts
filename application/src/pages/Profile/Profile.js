@@ -86,7 +86,6 @@ class Profile extends Component {
     }
 
     setInvalid = (val) => {
-        console.log(val);
         this.setState({invalid: val});
     }
 
@@ -100,7 +99,6 @@ class Profile extends Component {
 
     saveData = () => {
         
-        console.log(this.state);
         this.setState({
             error:''
         });
@@ -129,7 +127,6 @@ class Profile extends Component {
                 }
                 else {
                     this.setState({edit: false, username:data.username});
-                    console.log(this.state);
                 }
             }) 
             .catch(err => {
