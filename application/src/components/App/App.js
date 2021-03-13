@@ -118,7 +118,6 @@ class App extends Component {
                         loading:false,
                         verified: data.verified
                     });
-                    console.log("RELOADING: ", data);
                 }
             }
             
@@ -142,7 +141,6 @@ class App extends Component {
             }
         })
         .then(data => {
-            console.log("RELOADING WISHES, ", data);
             if (data) {
                 this.setState({wishlist: data.wishlist});
             }
@@ -239,7 +237,6 @@ class App extends Component {
 
 
     render() {
-        console.log("APP STATE", this.state);
         let propsData = {
             login: this.login,
             logout:this.logout,

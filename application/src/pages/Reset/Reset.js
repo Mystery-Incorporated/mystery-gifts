@@ -99,7 +99,6 @@ class Reset extends Component {
             }
             else {
                 this.setWorking(true);
-                console.log("STATE: ", this.state);
                 fetch('/api/reset', {
                     method: 'POST',
                     body: JSON.stringify(this.state),
@@ -113,12 +112,10 @@ class Reset extends Component {
                     return res.json();
                 })
                 .then(data => {
-                    console.log("RESET DATA ", data);
                     if ('error' in data) {
                         this.setState({error: data.msg});
                     }
                     else {
-                        console.log("!getting here");
                         this.props.data.reload();
                         this.props.data.verify();
                         this.props.history.push('/');
@@ -139,7 +136,6 @@ class Reset extends Component {
             }
         })
         .then(res => {
-            console.log(res.status);
             if (res.status !== 200) {
                 this.props.history.push('/');
             } 

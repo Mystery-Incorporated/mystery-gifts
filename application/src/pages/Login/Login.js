@@ -61,7 +61,6 @@ class Login extends Component {
     }
     
     setInvalid = (val) => {
-        console.log(val);
         this.setState({invalid: val});
     }
 
@@ -91,7 +90,6 @@ class Login extends Component {
                 this.setState({error: data.msg});
             }
             else {
-                console.log(data);
                 this.props.data.login(data);
                 this.props.history.push('/');
             }
@@ -115,7 +113,6 @@ class Login extends Component {
             }
         })
         .then(res => {
-            console.log(res.status);
             if (res.status === 200) {
                 this.props.history.push('/');
             } 
